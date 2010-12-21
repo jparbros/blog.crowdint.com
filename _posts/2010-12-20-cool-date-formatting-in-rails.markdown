@@ -4,6 +4,7 @@ title: Cool date formatting in Rails
 author: Gonzalo Fernandez
 email: gonzalo@crowdint.com
 avatar: d3177da7794ac3ce603d65b33bf4a981
+published: true
 ---
 
 In almost every Rails application, you will need to show dates in a given format...

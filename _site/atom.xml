@@ -4,14 +4,105 @@
  <title>Crowd Interactive Tech Blog</title>
  <link href="http://blog.crowdint.com/atom.xml" rel="self"/>
  <link href="http://blog.crowdint.com/"/>
- <updated>2010-12-14T20:23:38-08:00</updated>
+ <updated>2010-12-21T10:31:37-07:00</updated>
  <id>http://blog.crowdint.com</id>
  
  
  <entry>
+   <title>Cool date formatting in Rails</title>
+   <link href="http://blog.crowdint.com/2010/12/20/cool-date-formatting-in-rails.html"/>
+   <updated>2010-12-20T00:00:00-07:00</updated>
+   <id>http://blog.crowdint.com/2010/12/20/cool-date-formatting-in-rails</id>
+   <content type="html">&lt;p&gt;In almost every Rails application, you will need to show dates in a given format...
+That's why the strftime function exists, and you can customize the output to meet your needs to something like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;days&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ago&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strftime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;%m/%d/%Y %l:%M %P&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;12/19/2010  4:18 pm&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;This is very customizable, but is hard to mantain and definitly... not cool ;)
+In fact, this looks like old C/PHP code&lt;/p&gt;
+
+&lt;h2&gt;The &quot;cool&quot; way&lt;/h2&gt;
+
+&lt;p&gt;Rails is all cool, and DRY and following conventions, so that's why we need to use the to__s method, which uses the Time::DATE_FORMATS...&lt;/p&gt;
+
+&lt;p&gt;By default, Rails comes with a few one you can use:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;:long_ordinal&lt;/li&gt;
+&lt;li&gt;:long&lt;/li&gt;
+&lt;li&gt;:db&lt;/li&gt;
+&lt;li&gt;:short&lt;/li&gt;
+&lt;li&gt;:time&lt;/li&gt;
+&lt;li&gt;:number&lt;/li&gt;
+&lt;li&gt;:rfc822&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;So, you can execute for example:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;days&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ago&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_s&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:short&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;19 Dec 16:27&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;Much better now, isn't it?&lt;/p&gt;
+
+&lt;h2&gt;Custom formats&lt;/h2&gt;
+
+&lt;p&gt;The problem is that Rails doesn't provide an obvious way to do that...&lt;/p&gt;
+
+&lt;p&gt;So reading the Rails code (activesupport/lib/active_support/core_ext/date_time/conversions.rb) I found that you could create an initializer in your Rails project and add your own custom formats there:&lt;/p&gt;
+
+&lt;p&gt;config/initizers/time_formats.rb&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# == Adding your own datetime formats to to_formatted_s&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# DateTime formats are shared with Time. You can add your own to the&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Time::DATE_FORMATS hash. Use the format name as the hash key and&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# either a strftime string or Proc instance that takes a time or&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# datetime argument as the value.&lt;/span&gt;
+
+&lt;span class=&quot;no&quot;&gt;Time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DATE_FORMATS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:month_and_year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;%B %Y&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;Time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DATE_FORMATS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:human&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;%m/%d/%y @ %I:%M%p&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;So here I'm creating 2 new date/time formats to use with the to_s method.&lt;/p&gt;
+
+&lt;p&gt;Let's see how different and clean the code is:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# the &amp;quot;cool&amp;quot; way&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;days&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ago&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_s&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:human&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# the old school way&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;days&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ago&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strftime&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;%m/%d/%y @ %I:%M%p&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;Cool, isn't it?&lt;/p&gt;
+
+&lt;p&gt;And after several reuses of the format, you will start noticing the adventages... especially when you need a change in the format With this aproach is only one change (versus search the whole project for strftime usages).&lt;/p&gt;
+
+&lt;p&gt;Hope this help...
+Thanks for reading
+Gonzalo &quot;aka Chalo&quot; Fernandez&lt;/p&gt;
+</content>
+   <author>
+     <name>Gonzalo Fernandez</name>
+     <email>gonzalo@crowdint.com</email>
+   </author>
+ </entry>
+ 
+ <entry>
    <title>Always Think RESTful</title>
    <link href="http://blog.crowdint.com/2010/12/15/always-think-restful.html"/>
-   <updated>2010-12-15T00:00:00-08:00</updated>
+   <updated>2010-12-15T00:00:00-07:00</updated>
    <id>http://blog.crowdint.com/2010/12/15/always-think-restful</id>
    <content type="html">&lt;p&gt;What I am about to describe in this post is probably something obvious to the
 advanced Rails developer. Yet, it's sometimes hard to get the concept
@@ -67,8 +158,8 @@ all actions performed on the Order objects should be done via that controller.&l
     &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
-  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;return&lt;/span&gt;
-
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;return_order&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -78,7 +169,8 @@ all actions performed on the Order objects should be done via that controller.&l
 &lt;h3&gt;What's wrong here?&lt;/h3&gt;
 
 &lt;p&gt;If you take a look at it, there's all these actions on the controller
-that shouldn't be there: review, remove_review, cancel, pay, return.&lt;/p&gt;
+that shouldn't be there: review, remove_review, cancel, pay,
+return_order.&lt;/p&gt;
 
 &lt;p&gt;Thinking restful is thinking CRUD. Create, Retrieve, Update, Delete. It
 means that you have &lt;em&gt;resources&lt;/em&gt; and that with every request you are
@@ -193,7 +285,7 @@ them.&lt;/p&gt;
  <entry>
    <title>Improving your development life with Ruby Enterprise Edition</title>
    <link href="http://blog.crowdint.com/2010/12/07/improving-your-dev-life-with-ree.html"/>
-   <updated>2010-12-07T00:00:00-08:00</updated>
+   <updated>2010-12-07T00:00:00-07:00</updated>
    <id>http://blog.crowdint.com/2010/12/07/improving-your-dev-life-with-ree</id>
    <content type="html">&lt;p&gt;Have you ever wondered if you can do something to make your ruby development even faster?
 Are you tired of waiting for rspec to finish?
@@ -534,7 +626,7 @@ Total:         84 4391 760.0   4473    5830
  <entry>
    <title>RSpec for really newbies</title>
    <link href="http://blog.crowdint.com/2010/11/30/rspec-for-really-newbies.html"/>
-   <updated>2010-11-30T00:00:00-08:00</updated>
+   <updated>2010-11-30T00:00:00-07:00</updated>
    <id>http://blog.crowdint.com/2010/11/30/rspec-for-really-newbies</id>
    <content type="html">&lt;p&gt;First off, this post is meant to be a brief introduction for testing Rails applications with RSpec, I'll only get into model and controller testing.&lt;/p&gt;
 
@@ -671,7 +763,7 @@ The last example tests the &lt;em&gt;:new&lt;/em&gt; method in the controller, a
  <entry>
    <title>Watermarking images minimizing the overhead</title>
    <link href="http://blog.crowdint.com/2010/11/24/watermarking-images.html"/>
-   <updated>2010-11-24T00:00:00-08:00</updated>
+   <updated>2010-11-24T00:00:00-07:00</updated>
    <id>http://blog.crowdint.com/2010/11/24/watermarking-images</id>
    <content type="html">&lt;p&gt;During the days I was working for a project called &lt;a href=&quot;http://creativeallies.com&quot;&gt;Creative Allies&lt;/a&gt;, I faced the need to find a way to stamp watermarks in user images; some of them were files with long width/height attributes and though the process was apparently simple, in practice our servers even crashed the app due to overhead.&lt;/p&gt;
 
@@ -842,7 +934,7 @@ Watermark dimensions are: 250 x 250 pixels&lt;/p&gt;
  <entry>
    <title>Rack Basics - A Rack Introduction</title>
    <link href="http://blog.crowdint.com/2010/11/17/rack-basics-a-rack-introduction.html"/>
-   <updated>2010-11-17T00:00:00-08:00</updated>
+   <updated>2010-11-17T00:00:00-07:00</updated>
    <id>http://blog.crowdint.com/2010/11/17/rack-basics-a-rack-introduction</id>
    <content type="html">&lt;p&gt;Rack provides a minimal interface between web servers supporting &lt;strong&gt;Ruby&lt;/strong&gt;. It contains a full stack
 of middleware components. Using &lt;strong&gt;Rack&lt;/strong&gt; middleware you can build applications that directly interact
@@ -1212,7 +1304,7 @@ look forward to them.&lt;/p&gt;
  <entry>
    <title>Subdomains in Rails (2.3.x & 3)</title>
    <link href="http://blog.crowdint.com/2010/11/11/subdomains-in-rails-2-and-3.html"/>
-   <updated>2010-11-11T00:00:00-08:00</updated>
+   <updated>2010-11-11T00:00:00-07:00</updated>
    <id>http://blog.crowdint.com/2010/11/11/subdomains-in-rails-2-and-3</id>
    <content type="html">&lt;h2&gt;Why?&lt;/h2&gt;
 
@@ -1807,7 +1899,7 @@ public/images/system/**/*
  <entry>
    <title>Working with PostgreSQL and Rails3</title>
    <link href="http://blog.crowdint.com/2010/10/27/working-with-postgresql-and-rails3.html"/>
-   <updated>2010-10-27T00:00:00-07:00</updated>
+   <updated>2010-10-27T00:00:00-06:00</updated>
    <id>http://blog.crowdint.com/2010/10/27/working-with-postgresql-and-rails3</id>
    <content type="html">&lt;p&gt;Now, since Rails3 is released, many projects come to be on their phase of migration, but this time I'll show you how I got my Rails environment to work with PostgreSQL.&lt;/p&gt;
 
@@ -1942,7 +2034,7 @@ So this will create a user with database and user creation permissions with a de
  <entry>
    <title>Improve your SEO with a sitemap</title>
    <link href="http://blog.crowdint.com/2010/10/22/improve-your-seo-with-a-sitemap.html"/>
-   <updated>2010-10-22T00:00:00-07:00</updated>
+   <updated>2010-10-22T00:00:00-06:00</updated>
    <id>http://blog.crowdint.com/2010/10/22/improve-your-seo-with-a-sitemap</id>
    <content type="html">&lt;p&gt;Having a sitemap is the way search engines like Google, Yahoo, Bing and others can crawl the information of all of the urls in our website.&lt;/p&gt;
 
@@ -2021,7 +2113,7 @@ So this will create a user with database and user creation permissions with a de
  <entry>
    <title>Magma Rails 2010, a success!</title>
    <link href="http://blog.crowdint.com/2010/10/18/magmarails-2010-was-a-success.html"/>
-   <updated>2010-10-18T00:00:00-07:00</updated>
+   <updated>2010-10-18T00:00:00-06:00</updated>
    <id>http://blog.crowdint.com/2010/10/18/magmarails-2010-was-a-success</id>
    <content type="html">&lt;p&gt;And it's all thanks to &lt;em&gt;you&lt;/em&gt;.&lt;/p&gt;
 
@@ -2051,7 +2143,7 @@ So this will create a user with database and user creation permissions with a de
  <entry>
    <title>Magma Rails is just around the corner!</title>
    <link href="http://blog.crowdint.com/2010/10/07/magma-rails.html"/>
-   <updated>2010-10-07T00:00:00-07:00</updated>
+   <updated>2010-10-07T00:00:00-06:00</updated>
    <id>http://blog.crowdint.com/2010/10/07/magma-rails</id>
    <content type="html">&lt;p&gt;We're very proud and excited to be host to this great event that will take place in the city of Colima, Mexico.&lt;/p&gt;
 
@@ -2073,7 +2165,7 @@ So this will create a user with database and user creation permissions with a de
  <entry>
    <title>Negative Code</title>
    <link href="http://blog.crowdint.com/2010/09/28/negative-code.html"/>
-   <updated>2010-09-28T00:00:00-07:00</updated>
+   <updated>2010-09-28T00:00:00-06:00</updated>
    <id>http://blog.crowdint.com/2010/09/28/negative-code</id>
    <content type="html">&lt;p&gt;Last night I was checking certain social network at home, you know, the usual bad habit, when suddenly I found a phrase that caught my attention. What was that uncertain concept that attracted my senses? Well, it was &quot;negative code&quot;. &quot;What is it?&quot; I thought.&lt;/p&gt;
 
@@ -2120,7 +2212,7 @@ So this will create a user with database and user creation permissions with a de
  <entry>
    <title>First contact with regular expressions</title>
    <link href="http://blog.crowdint.com/2010/09/22/first-contact-with-regular-expressions.html"/>
-   <updated>2010-09-22T00:00:00-07:00</updated>
+   <updated>2010-09-22T00:00:00-06:00</updated>
    <id>http://blog.crowdint.com/2010/09/22/first-contact-with-regular-expressions</id>
    <content type="html">&lt;p&gt;If you're looking for a way to save yourself some lines of code along with some time thinking about match cases, regular expressions are your friend. Mainly used to recognize patterns, a regular expression is a way to specify a pattern of characters to be searched within a string.&lt;/p&gt;
 
@@ -2323,38 +2415,6 @@ but there are some few more useful links to look at:
    <author>
      <name>Francisco Guzm&amp;aacute;n</name>
      <email>francisco.guzman@crowdint.com</email>
-   </author>
- </entry>
- 
- <entry>
-   <title>Installing gems skipping RDoc and RI</title>
-   <link href="http://blog.crowdint.com/2010/09/17/installing-gems-skipping-rdoc-and-ri.html"/>
-   <updated>2010-09-17T00:00:00-07:00</updated>
-   <id>http://blog.crowdint.com/2010/09/17/installing-gems-skipping-rdoc-and-ri</id>
-   <content type="html">&lt;p&gt;Because, let's be honest, these days, we're always connected to the internet.&lt;/p&gt;
-
-&lt;p&gt;Personally, I've never used the RDoc included on gem installations.&lt;/p&gt;
-
-&lt;p&gt;If I need info about a class, method, module, I ask uncle &lt;em&gt;Google&lt;/em&gt;.&lt;/p&gt;
-
-&lt;p&gt;Besides, it gets kind of annoying, specially when there's gems that take longer to generate the RDoc, than it takes for the actual gem to install.&lt;/p&gt;
-
-&lt;p&gt;So, here's a tip for those who don't want to wait for gem to install RDoc you'll never use.&lt;/p&gt;
-
-&lt;p&gt;It is as simple as, opening or creating a &lt;em&gt;.gemrc&lt;/em&gt; file in your home directory, and adding the following line:&lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;gem: --no-rdoc --no-ri
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-
-&lt;p&gt;And that's it. You're setting those options as default when using the gem command. So, the next time you install a gem, it will skip the part where it compiles the gem's documentation.&lt;/p&gt;
-
-&lt;p&gt;There you go, enjoy!&lt;/p&gt;
-</content>
-   <author>
-     <name>David Padilla</name>
-     <email>david@crowdint.com</email>
    </author>
  </entry>
  
